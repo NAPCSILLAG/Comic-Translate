@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+import sys
 
 def hello():
-    print("szia ki vagy te ?")
+    print("Sziasztok!")
 
 if __name__ == '__main__':
     hello()
