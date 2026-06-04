@@ -1,0 +1,35 @@
+════════════════════════════════════════════════════════════════════════
+  OCR PIPELINE GYÖKÉROK DIAGNÓZIS
+════════════════════════════════════════════════════════════════════════
+
+── BUBBLE TRACE TÁBLA ──────────────────────────────────────────
+  # │                   bbox │        crop │   det │ poly │       persp │        logit │                 text
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  0 │     [772, 24, 911, 83] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+  1 │     [95, 62, 288, 173] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+  2 │   [725, 267, 862, 328] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+  3 │   [710, 334, 863, 424] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+  4 │   [590, 483, 847, 538] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+  5 │   [378, 494, 534, 602] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+  6 │   [399, 606, 516, 681] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+  7 │   [279, 776, 431, 896] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+  8 │  [736, 891, 1020, 974] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+  9 │ [570, 1013, 742, 1100] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+ 10 │ [803, 1008, 979, 1126] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+ 11 │ [336, 1005, 487, 1094] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+ 12 │  [88, 1013, 279, 1127] │         0×0 │     — │    0 │           — │            — │                    —  ← DEFAULT (tracking bug?)
+
+  Összesítés: crop_valid=0  crop_zero=13  poly_zero=0
+
+
+════════════════════════════════════════════════════════════════════════
+  ROOT CAUSE ANALÍZIS
+════════════════════════════════════════════════════════════════════════
+
+1. crop_shape=(0,0) EREDETE:
+   TRACKING BUG: 13 buborék soha nem kapott crop_shape frissítést
+   (current_id nem frissült process_page() futása közben)
+   EVIDENCE: default BubbleTrace.crop_shape = (0,0)
+   AFFECTED: AuditCollector.current_id beállítás logikája az előző audit scriptben
+
+4. POLYGON ORDERING AUDIT:
