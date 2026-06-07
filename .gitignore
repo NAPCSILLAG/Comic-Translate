@@ -1,2 +1,4 @@
 .venv/
 .aider*
+__pycache__/
+output/
