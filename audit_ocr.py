@@ -810,7 +810,7 @@ def run_audit(image_path: str) -> None:
     # Section A: Normalizáció audit
     log.info("\n=== A: Normalizáció audit ===")
     audit_normalization(
-        det_model_path="models/ocr/ppocr-v5-onnx/ch_PP-OCRv5_mobile_det.onnx",
+        det_model_path="models/ocr/ppocr-v5-onnx/ml_PP-OCRv5_mobile_det.onnx",
         rec_model_path="models/ocr/ppocr-v5-onnx/en_PP-OCRv5_rec_mobile_infer.onnx",
         test_image_rgb=img_rgb,
     )

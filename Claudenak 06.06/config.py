@@ -209,7 +209,7 @@ class RenderingConfig:
 class TranslationConfig:
     """Ollama / LLM fordítás beállítások."""
     base_url:       str   = "http://localhost:11434"
-    model:          str   = "translategemma:latest"
+    model:          str   = "qwen3-vl:8b"
     max_tokens:     int   = 256
     temperature:    float = 0.2
     timeout_sec:    int   = 90

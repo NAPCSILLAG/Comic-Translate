@@ -874,14 +874,11 @@ class PipelineOrchestrator:
 
                 from metadata import BubbleData
                 new_bubbles: list[BubbleData] = []
-                for i, d in enumerate(bubbles_dicts):
-                    # "id" kulcs nincs a vlm_extract_full outputban – "order"-t használjuk
-                    # Ha azt sem tartalmazza, az enumerate index biztosítja az egyediséget
-                    bid = d.get("id") or d.get("order") or i
+                for d in bubbles_dicts:
                     new_bubbles.append(BubbleData(
-                        bubble_id      = bid,
+                        bubble_id      = d.get("id", 0),
                         bbox           = d["bbox"],
-                        reading_order  = d.get("order", i),
+                        reading_order  = d.get("order", 0),
                         raw_text       = d.get("raw_text", ""),
                         ocr_confidence = d.get("ocr_confidence", 0.0),
                     ))

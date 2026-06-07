@@ -270,9 +270,8 @@ def estimate_vram(pcfg=None) -> VRAMEstimate:
     # YOLO layout
     components["YOLO layout"] = 0.4
 
-    # Gemma és fordítás: Ollama kezeli, nem direkt VRAM
-    if not skip_gemma:
-        components["Gemma4 (Ollama – külső)"] = 0.0
+    # Gemma and Qwen-VL: Ollama handles external provider setup; no direct VRAM
+    components["Qwen2-VL OCR (Ollama – külső)"] = 0.0
     components["Translation (Ollama – külső)"] = 0.0
 
     total = sum(v for v in components.values() if v > 0)
@@ -323,11 +322,9 @@ def _ai_stack_summary() -> dict[str, str]:
 
     return {
         "Translation": cfg.translation.model,
-        "Gemma":       cfg.vision.gemma_model,
         "Vision (VLM)": cfg.vision.vlm_model_id,
         "OCR":         "PP-OCRv5 ONNX",
         "Layout":      layout_name,
-        "Inpainting":  lama_name,
     }
 
 
@@ -568,4 +565,4 @@ class PreflightChecker:
             f"device={cfg.device.device} | "
             f"SS={cfg.rendering.supersample_factor}x | "
             f"LLM={cfg.translation.model} | "
-            f"Gemma={cfg.vision.gemma_model}")
+            f"VLM={cfg.vision.vlm_model_id}")

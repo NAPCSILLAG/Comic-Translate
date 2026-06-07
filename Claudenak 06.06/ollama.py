@@ -157,7 +157,6 @@ class OllamaProvider(LightweightProvider):
             "options": {
                 "temperature": self.temperature,
                 "num_predict": self.max_tokens,
-                "repeat_penalty": 1.15,   # fordítási loop megelőzés
             },
         }
 
@@ -195,7 +194,6 @@ class OllamaProvider(LightweightProvider):
             "options": {
                 "temperature": self.temperature,
                 "num_predict": self.max_tokens,
-                "repeat_penalty": 1.15,   # fordítási loop megelőzés
             },
         }
         resp = requests.post(

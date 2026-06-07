@@ -36,20 +36,15 @@ Respond ONLY with valid JSON (no markdown, no explanation):
 }"""
 
 EXTRACTION_PROMPT = """You are a precise comic book OCR and layout analysis tool. Your task is to detect EVERY single speech bubble on the page. Do not skip any.
-
-SCANNING STRATEGY:
-1. Scan the page systematically: TOP-LEFT -> TOP-RIGHT -> MIDDLE-LEFT -> MIDDLE-RIGHT -> BOTTOM-LEFT -> BOTTOM-RIGHT.
-2. For each panel, identify all bubbles before moving to the next panel.
-3. Do not launder or group bubbles; treat every single distinct text area as a separate bubble.
-
 For each bubble, you must return the EXACT coordinates on a 0-1000 normalized scale using the format [ymin, xmin, ymax, xmax] and the text inside it.
 
 CRITICAL INSTRUCTIONS:
-- Ensure you don't stop generating until ALL bubbles are extracted.
-- Do NOT round the coordinates to the nearest hundred. Look closely at the exact pixel boundaries of the speech bubbles and convert them accurately to the 0-1000 scale.
+- Scan the page systematically from top-left to bottom-right.
+- Count the bubbles. Ensure you don't stop generating until ALL bubbles are extracted.
+- Do NOT round the coordinates to the nearest hundred (e.g., do NOT output [100, 50, 300, 400] if the precise edge is at [123, 55, 294, 412]). Look closely at the exact pixel boundaries of the speech bubbles and convert them accurately to the 0-1000 scale.
 - Return the data in the exact JSON format required by the schema: {"bubbles": [{"box_2d": [ymin, xmin, ymax, xmax], "text": "text"}]}
 
-JSON ONLY. NO THINKING. NO EXPLANATION. NO IMAGE DESCRIPTION. The response must start immediately with the { character! Pre-fill JSON format."""
+JSON ONLY. NO THINKING. NO EXPLANATION. NO IMAGE DESCRIPTION. A válaszod azonnal a { karakterrel kezdődjön! Pre-fill JSON format."""
 
 FALLBACK_CONTEXT = {
     "tone": "neutral",

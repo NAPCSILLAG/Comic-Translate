@@ -556,18 +556,17 @@ class InpaintingManager:
 
         # 3. Háttér becslés
         bg_color  = self._bg.estimate(image_f32, bbox, mask_soft)
+        is_simple = self._bg.is_simple(image_f32, bbox)
 
-        # ── DETERMINISZTIKUS FILL (LaMa helyett) ─────────────────────────────
-        # Képregénynél a LaMa komplex háttereken sávokat/artifactokat produkál.
-        # Fehér vagy háttérszínű kitöltés minden esetben megbízhatóbb.
-        # A buborék kontúrja megmarad (csak a maszk terület törlődik).
-        logger.debug(f"Determinisztikus fill [{bbox}] bg_color={[round(c,2) for c in bg_color]}")
-        result_f32 = self._direct_fill(image_f32, mask_soft, bbox, bg_color)
-        return result_f32
+        # 4. Egyszerű háttér → direct fill, LaMa kihagyva
+        if is_simple:
+            logger.debug(f"Egyszerű háttér [{bbox}] – direct fill")
+            result_f32 = self._direct_fill(
+                image_f32, mask_soft, bbox, bg_color)
+            return result_f32
 
-        # ── LaMa inpainting (kikapcsolva – csak ha visszakapcsolják) ──────────
-        # Ha szükséges: COMIC_INPAINT_LAMA=1 env var → LaMa visszakapcsolható
-        if False and self._lama.available:
+        # 5. LaMa inpainting
+        if self._lama.available:
             try:
                 # Prefill: LaMa-nak homogén hátteret adunk
                 prefilled = self._bg.prefill(

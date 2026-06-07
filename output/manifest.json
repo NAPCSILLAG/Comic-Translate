@@ -1,0 +1,41 @@
+{
+  "metadata_version": "1.0",
+  "created_at": "2026-06-06T18:27:57",
+  "total_pages": 1,
+  "success_count": 1,
+  "failed_count": 0,
+  "skipped_count": 0,
+  "partial_count": 0,
+  "total_elapsed_sec": 50.1,
+  "avg_ocr_conf": 0.0,
+  "avg_render_score": 0.0,
+  "providers_summary": {
+    "layout:yolo": 1,
+    "ocr:qwen2_vl": 1,
+    "ocr_correction:qwen2_vl": 1,
+    "translation:ollama": 1,
+    "inpaint:lama_onnx": 1,
+    "render:pillow": 1
+  },
+  "pages": [
+    {
+      "page_id": "teszt",
+      "source_path": "input/teszt.jpg",
+      "status": "success",
+      "total_bubbles": 13,
+      "translated_count": 0,
+      "avg_ocr_conf": 0.0,
+      "avg_render_score": 0.0,
+      "providers_used": {
+        "layout": "yolo",
+        "ocr": "qwen2_vl",
+        "ocr_correction": "qwen2_vl",
+        "translation": "ollama",
+        "inpaint": "lama_onnx",
+        "render": "pillow"
+      },
+      "elapsed_sec": 49.98,
+      "error": null
+    }
+  ]
+}
