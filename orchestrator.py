@@ -544,6 +544,12 @@ class PipelineOrchestrator:
             self.registry.register(
                 Qwen2VLProvider(enabled=cfg.vision.enabled))
 
+        # AI providers
+        from providers.vision.minicpm_ocr import MiniCPMOCRProvider
+        from providers.cloud.gemini_flash import GeminiFlashCloudProvider
+        self.registry.register(MiniCPMOCRProvider())
+        self.registry.register(GeminiFlashCloudProvider())
+
         # Gemma4 – eltávolítva a pipeline-ból (nincs import/futtatás)
 
         # ProviderPool
@@ -842,12 +848,13 @@ class PipelineOrchestrator:
         # Oldal-kezdeti reset: PPOCRv5 session-szamlalo nullazasa
         ocr.reset_session()
 
-        # CLI / config backend override alkalmazasa
+        # ── AI backend dispatch ───────────────────────────────────────────────────
         if self.pcfg.ocr_backend:
             ocr.set_backend(self.pcfg.ocr_backend)
 
-        # ── VLM-alapú kinyerés (Grounding + OCR) ──────────────────────────────────
-        if ocr._backend == "qwen2_vl":
+        backend = ocr._backend
+
+        if backend == "qwen2_vl":
             ex.set_provider("qwen2_vl")
             with self.pool.acquire("qwen2_vl") as qwen:
                 if not qwen:
@@ -889,6 +896,14 @@ class PipelineOrchestrator:
                 found = sum(1 for b in page.bubbles if b.raw_text)
                 logger.info(f"  OCR: {found}/{len(page.bubbles)} buborek kinyerve VLM-mel")
                 return
+
+        if backend == "minicpm_ocr":
+            self._run_local_ai_ocr(page, image, ex)
+            return
+
+        if backend == "gemini_flash":
+            self._run_cloud_ai(page, image, ex)
+            return
 
         # ── Hagyományos OCR folyamat (Layout -> OCR) ─────────────────────────────
         bubble_dicts = [b.to_dict() for b in page.bubbles]
@@ -955,11 +970,130 @@ class PipelineOrchestrator:
 
         logger.info(f"  OCR korrekció: 0 javitva")
 
+    def _run_local_ai_ocr(
+        self,
+        page:  PageData,
+        image: np.ndarray,
+        ex:    StageExecutor,
+    ) -> None:
+        """
+        MiniCPM OCR – buborék-crop szintű végrehajtás.
+
+        Vezérlő ág: YOLO bbox → crop RGB → MiniCPMOCRProvider.timed_run(crop)
+        """
+        from providers.vision.minicpm_ocr import MiniCPMOCRProvider
+
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        ocr_count = 0
+
+        with self.pool.acquire("minicpm_ocr") as ocr:
+            if ocr is None or not isinstance(ocr, MiniCPMOCRProvider):
+                ex.warn("MiniCPM OCR provider nem elérhető")
+                return
+
+            for bd in page.bubbles:
+                if bd.manually_edited:
+                    continue
+
+                x1, y1, x2, y2 = bd.bbox
+                if x2 <= x1 or y2 <= y1:
+                    continue
+
+                crop = image_rgb[int(y1):int(y2), int(x1):int(x2)]
+                if crop.size == 0:
+                    continue
+
+                result = ocr.timed_run(crop_rgb=crop)
+                if result.success and result.data:
+                    text = str(result.data.get("text", "")).strip()
+                    bd.raw_text = text
+                    bd.ocr_confidence = float(result.confidence or 0.0)
+                    if text:
+                        ocr_count += 1
+                else:
+                    bd.raw_text = ""
+                    bd.ocr_confidence = 0.0
+
+        ex.set_provider("minicpm_ocr")
+        logger.info(f"  OCR (MiniCPM): {ocr_count}/{len(page.bubbles)} buborék")
+
+    def _run_cloud_ai(
+        self,
+        page:  PageData,
+        image: np.ndarray,
+        ex:    StageExecutor,
+    ) -> None:
+        """
+        Gemini Flash – egyetlen API hívásban:
+        - OCR
+        - karakterfelismerés
+        - fordítás
+
+        A provider NEM ír BubbleData mezőket; az orchestrator tölti ki:
+        - bd.raw_text
+        - bd.translated_text
+        """
+        with self.pool.acquire("gemini_flash") as gemini:
+            if gemini is None:
+                ex.warn("Gemini Flash provider nem elérhető")
+                return
+
+            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            bubble_list = [b.to_dict() for b in page.bubbles]
+
+            result = gemini.timed_run(
+                full_page_rgb=image_rgb,
+                bubble_list=bubble_list,
+            )
+
+            if not result.success or not result.data:
+                ex.warn(f"Gemini Flash hiba: {result.error}")
+                return
+
+            parsed = result.data
+            id_map = {b["bubble_id"]: b for b in parsed}
+
+            for bd in page.bubbles:
+                if bd.manually_edited:
+                    continue
+
+                cloud = id_map.get(bd.bubble_id)
+                if not cloud:
+                    continue
+
+                src = str(cloud.get("source_text", "")).strip()
+                bd.raw_text = src
+                bd.ocr_confidence = float(cloud.get("confidence", 0.9))
+                bd.tone = str(cloud.get("speaker", bd.tone or ""))
+
+                tr = str(cloud.get("translated_text", "")).strip()
+                if tr:
+                    bd.translated_text = tr
+                    bd.provider_used = "gemini_flash"
+
+        ex.set_provider("gemini_flash")
+        found = sum(1 for b in page.bubbles if b.raw_text)
+        translated = sum(1 for b in page.bubbles if b.translated_text)
+        logger.info(
+            f"  OCR (Gemini): {found}/{len(page.bubbles)} szöveg | "
+            f"{translated}/{len(page.bubbles)} fordítva"
+        )
+
     def _run_translation(
         self,
         page: PageData,
         ex:   StageExecutor,
     ) -> None:
+        from ocr import get_ocr
+        backend = get_ocr()._backend
+
+        if backend == "gemini_flash" and not any(
+            (not bd.manually_edited and not bd.translated_text)
+            for bd in page.bubbles
+        ):
+            ex.skip("AI translation already done by Gemini Flash")
+            return
+
         from rendering import is_sfx
         provider_id = self.pcfg.translation_provider
         ex.set_provider(provider_id)

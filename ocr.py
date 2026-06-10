@@ -1036,6 +1036,107 @@ class EasyOCRFallback:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# PADDLEOCR PIPELINE
+# ══════════════════════════════════════════════════════════════════════════════
+
+class PaddleOCRPipeline:
+    """PaddleOCR pipeline – singleton wrapper buborék szintű OCR-hez."""
+
+    _instance: Optional["PaddleOCRPipeline"] = None
+
+    def __init__(self) -> None:
+        self._ocr: Any = None
+        self._load()
+
+    def _load(self) -> None:
+        try:
+            from paddleocr import PaddleOCR
+            self._ocr = PaddleOCR(
+                use_angle_cls=cfg.ocr.use_angle_cls,
+                lang=cfg.ocr.source_language,
+                show_log=False,
+            )
+            logger.info("PaddleOCR pipeline betöltve ✓")
+        except Exception as e:
+            logger.warning(f"PaddleOCR betöltési hiba: {e}")
+            self._ocr = None
+
+    @classmethod
+    def run_singleton(
+        cls,
+        image_rgb: np.ndarray,
+        bbox: Optional[list[int]] = None,
+        language: str = None,
+        bubble_idx: int = 0,
+    ) -> list[OCRResult]:
+        if cls._instance is None:
+            cls._instance = cls()
+        if cls._instance._ocr is None:
+            return []
+        return cls._instance.run(image_rgb, bbox=bbox, language=language, bubble_idx=bubble_idx)
+
+    def run(
+        self,
+        image_rgb: np.ndarray,
+        bbox: Optional[list[int]] = None,
+        language: str = None,
+        bubble_idx: int = 0,
+    ) -> list[OCRResult]:
+        if self._ocr is None:
+            return []
+        if language is None:
+            language = cfg.ocr.source_language
+
+        h_orig, w_orig = image_rgb.shape[:2]
+        if bbox:
+            x1, y1, x2, y2 = bbox
+            x1 = max(0, x1); y1 = max(0, y1)
+            x2 = min(w_orig, x2); y2 = min(h_orig, y2)
+            region = image_rgb[y1:y2, x1:x2]
+            offset_x = float(x1)
+            offset_y = float(y1)
+        else:
+            region = image_rgb
+            offset_x = 0.0
+            offset_y = 0.0
+
+        try:
+            raw = self._ocr.ocr(region, cls=cfg.ocr.use_angle_cls, det=True, rec=True)[0]
+        except Exception as e:
+            logger.warning(f"PaddleOCR hiba buborék #{bubble_idx}: {e}")
+            return []
+
+        results: list[OCRResult] = []
+        if not raw:
+            return results
+
+        for i, item in enumerate(raw):
+            try:
+                poly, (text, conf) = item
+            except Exception:
+                continue
+            if not text or not text.strip():
+                continue
+            try:
+                pts = np.array(poly, dtype=np.float32)
+                pts[:, 0] += offset_x
+                pts[:, 1] += offset_y
+            except Exception:
+                continue
+
+            r = OCRResult.from_polygon_and_text(
+                polygon_pts=pts,
+                text=text,
+                confidence=float(conf),
+                language=language,
+                reading_order=i,
+            )
+            results.append(r)
+
+        return _assign_reading_order_and_groups(results)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # COMIC OCR – publikus API
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -1096,9 +1197,10 @@ class ComicOCR:
         self._init_fallback()
 
     def _init_fallback(self) -> None:
-        """EasyOCR fallback init - csak ha nem qwen2_vl."""
-        if self._backend != "qwen2_vl":
-            self._fallback = EasyOCRFallback()
+        """EasyOCR fallback init - csak ha nem qwen2_vl és nem paddleocr."""
+        if self._backend in ("qwen2_vl", "paddleocr"):
+            return
+        self._fallback = EasyOCRFallback()
 
     def _init_primary(self) -> None:
         """PPOCRv5 init – csak ha backend nem easyocr és nem qwen2_vl."""
@@ -1124,7 +1226,7 @@ class ComicOCR:
 
     def set_backend(self, backend: str) -> None:
         """Runtime backend váltás (CLI / orchestrator hívja)."""
-        valid = ("auto", "ppocr", "easyocr", "qwen2_vl")
+        valid = ("auto", "ppocr", "easyocr", "qwen2_vl", "paddleocr")
         if backend not in valid:
             logger.warning(f"Ismeretlen OCR backend: {backend!r} – marad: {self._backend}")
             return
@@ -1165,6 +1267,10 @@ class ComicOCR:
                 return []
             # <--- JAVÍTVA: bubble_idx továbbítása a pipeline felé
             return self._primary.run(image_rgb, bbox=bbox, language=language, bubble_idx=bubble_idx)
+
+        # ── PaddleOCR pipeline ──────────────────────────────────────────
+        if backend_mode == "paddleocr":
+            return PaddleOCRPipeline.run_singleton(image_rgb, bbox=bbox, language=language, bubble_idx=bubble_idx)
 
         # ── AUTO mód: PPOCRv5 → EasyOCR fallback ─────────────────────────
         if backend_mode == "qwen2_vl":

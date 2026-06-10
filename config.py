@@ -131,17 +131,24 @@ class OCRConfig:
     # auto    = PPOCRv5 elsonek, EasyOCR fallback ha 0 valid result
     # ppocr   = csak PPOCRv5
     # easyocr = csak EasyOCR
+    # paddleocr = lokális PaddleOCR pipeline
+    # minicpm_ocr = helyi MiniCPM OCR provider (buborék szinten)
+    # gemini_flash = Gemini Flash cloud AI (OCR + felismerés + fordítás)
     # qwen2_vl = Ollama-alapú VLM grounding OCR
-    backend:        str   = "qwen2_vl"
+    backend: str = "qwen2_vl"
     # Confidence threshold – alacsonyabb = több szöveg detektálva
-    det_thresh:     float = 0.30
-    rec_thresh:     float = 0.50
+    det_thresh: float = 0.30
+    rec_thresh: float = 0.50
     # Preprocessing
-    use_angle_cls:  bool  = True
-    max_image_side: int   = 2560   # felskálázás limit
+    use_angle_cls: bool = True
+    max_image_side: int = 2560   # felskálázás limit
     # Fallback: EasyOCR ha ppocr-v5 nem elérhető
     fallback_to_easyocr: bool = True
-    easyocr_lang:   list  = field(default_factory=lambda: ["en"])
+    easyocr_lang: list = field(default_factory=lambda: ["en"])
+    # Extras
+    minicpm_model_name: str = "minicpm-v:latest"
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.0-flash-exp"
 
 
 @dataclass
@@ -436,12 +443,20 @@ class Config:
         if v := _float("COMIC_OCR_DET_THRESH"):
             self.ocr.det_thresh = v
         if v := _str("COMIC_OCR_BACKEND"):
-            if v in ("auto", "ppocr", "easyocr"):
+            if v in ("auto", "ppocr", "easyocr", "paddleocr", "minicpm_ocr", "gemini_flash", "qwen2_vl"):
                 self.ocr.backend = v
             else:
                 _log.warning(
                     f"COMIC_OCR_BACKEND ervenytelen: '{v}' "
-                    "(auto/ppocr/easyocr) – kihagyva")
+                    "– kihagyva")
+
+        # Extras
+        if v := _str("COMIC_MINICPM_MODEL"):
+            self.ocr.minicpm_model_name = v
+        if v := _str("COMIC_GEMINI_API_KEY"):
+            self.ocr.gemini_api_key = v
+        if v := _str("COMIC_GEMINI_MODEL"):
+            self.ocr.gemini_model = v
 
         # ── Inpainting ─────────────────────────────────────────────────────
         if v := _path("COMIC_LAMA_MODEL_PATH", must_exist=True):

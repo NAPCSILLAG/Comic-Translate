@@ -36714,3 +36714,151 @@ SyntaxError: unexpected character after line continuation character
 18:27:57 | INFO     | orchestrator           |   Output:   output
 18:27:57 | INFO     | orchestrator           | ======================================================
 18:27:57 | INFO     | __main__               | Teljes futasi ido: 51.2s
+07:50:22 | INFO     | providers.translation.ollama | [ollama] Modell elérhető: blaifa/InternVL3_5:4B
+07:50:22 | DEBUG    | providers.base         | Provider regisztrálva: ollama
+07:50:22 | DEBUG    | providers.base         | Provider regisztrálva: qwen2_vl
+07:50:22 | CRITICAL | __main__               | Varatlan hiba: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+Traceback (most recent call last):
+  File "/home/teszt/Comic Translate/main.py", line 344, in main
+    exit_code = run_batch(args)
+                ^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/main.py", line 302, in run_batch
+    orch     = PipelineOrchestrator(pcfg)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/orchestrator.py", line 522, in __init__
+    self._init_providers()
+  File "/home/teszt/Comic Translate/orchestrator.py", line 550, in _init_providers
+    self.registry.register(MiniCPMOCRProvider())
+                           ^^^^^^^^^^^^^^^^^^^^
+TypeError: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+07:50:22 | INFO     | __main__               | Teljes futasi ido: 1.3s
+07:50:49 | INFO     | providers.translation.ollama | [ollama] Modell elérhető: blaifa/InternVL3_5:4B
+07:50:49 | DEBUG    | providers.base         | Provider regisztrálva: ollama
+07:50:49 | DEBUG    | providers.base         | Provider regisztrálva: qwen2_vl
+07:50:49 | CRITICAL | __main__               | Varatlan hiba: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+Traceback (most recent call last):
+  File "/home/teszt/Comic Translate/main.py", line 344, in main
+    exit_code = run_batch(args)
+                ^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/main.py", line 302, in run_batch
+    orch     = PipelineOrchestrator(pcfg)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/orchestrator.py", line 522, in __init__
+    self._init_providers()
+  File "/home/teszt/Comic Translate/orchestrator.py", line 550, in _init_providers
+    self.registry.register(MiniCPMOCRProvider())
+                           ^^^^^^^^^^^^^^^^^^^^
+TypeError: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+07:50:49 | INFO     | __main__               | Teljes futasi ido: 1.2s
+13:33:53 | INFO     | providers.translation.ollama | [ollama] Modell elérhető: openbmb/minicpm-v2.6:8b
+13:33:53 | DEBUG    | providers.base         | Provider regisztrálva: ollama
+13:33:53 | DEBUG    | providers.base         | Provider regisztrálva: qwen2_vl
+13:33:53 | CRITICAL | __main__               | Varatlan hiba: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+Traceback (most recent call last):
+  File "/home/teszt/Comic Translate/main.py", line 344, in main
+    exit_code = run_batch(args)
+                ^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/main.py", line 302, in run_batch
+    orch     = PipelineOrchestrator(pcfg)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/orchestrator.py", line 522, in __init__
+    self._init_providers()
+  File "/home/teszt/Comic Translate/orchestrator.py", line 550, in _init_providers
+    self.registry.register(MiniCPMOCRProvider())
+                           ^^^^^^^^^^^^^^^^^^^^
+TypeError: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+13:33:53 | INFO     | __main__               | Teljes futasi ido: 1.3s
+11:07:38 | INFO     | providers.translation.ollama | [ollama] Modell elérhető: openbmb/minicpm-v2.6:8b
+11:07:38 | DEBUG    | providers.base         | Provider regisztrálva: ollama
+11:07:38 | DEBUG    | providers.base         | Provider regisztrálva: qwen2_vl
+11:07:38 | CRITICAL | __main__               | Varatlan hiba: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+Traceback (most recent call last):
+  File "/home/teszt/Comic Translate/main.py", line 344, in main
+    exit_code = run_batch(args)
+                ^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/main.py", line 302, in run_batch
+    orch     = PipelineOrchestrator(pcfg)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/orchestrator.py", line 522, in __init__
+    self._init_providers()
+  File "/home/teszt/Comic Translate/orchestrator.py", line 550, in _init_providers
+    self.registry.register(MiniCPMOCRProvider())
+                           ^^^^^^^^^^^^^^^^^^^^
+TypeError: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+11:07:38 | INFO     | __main__               | Teljes futasi ido: 1.2s
+11:09:28 | INFO     | providers.translation.ollama | [ollama] Modell elérhető: openbmb/minicpm-v2.6:8b
+11:09:28 | DEBUG    | providers.base         | Provider regisztrálva: ollama
+11:09:28 | DEBUG    | providers.base         | Provider regisztrálva: qwen2_vl
+11:09:28 | CRITICAL | __main__               | Varatlan hiba: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+Traceback (most recent call last):
+  File "/home/teszt/Comic Translate/main.py", line 344, in main
+    exit_code = run_batch(args)
+                ^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/main.py", line 302, in run_batch
+    orch     = PipelineOrchestrator(pcfg)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/orchestrator.py", line 522, in __init__
+    self._init_providers()
+  File "/home/teszt/Comic Translate/orchestrator.py", line 550, in _init_providers
+    self.registry.register(MiniCPMOCRProvider())
+                           ^^^^^^^^^^^^^^^^^^^^
+TypeError: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+11:09:28 | INFO     | __main__               | Teljes futasi ido: 1.2s
+11:14:58 | INFO     | providers.translation.ollama | [ollama] Modell elérhető: openbmb/minicpm-v2.6:8b
+11:14:58 | DEBUG    | providers.base         | Provider regisztrálva: ollama
+11:14:58 | DEBUG    | providers.base         | Provider regisztrálva: qwen2_vl
+11:14:58 | CRITICAL | __main__               | Varatlan hiba: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+Traceback (most recent call last):
+  File "/home/teszt/Comic Translate/main.py", line 344, in main
+    exit_code = run_batch(args)
+                ^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/main.py", line 302, in run_batch
+    orch     = PipelineOrchestrator(pcfg)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/orchestrator.py", line 522, in __init__
+    self._init_providers()
+  File "/home/teszt/Comic Translate/orchestrator.py", line 550, in _init_providers
+    self.registry.register(MiniCPMOCRProvider())
+                           ^^^^^^^^^^^^^^^^^^^^
+TypeError: Can't instantiate abstract class MiniCPMOCRProvider with abstract methods _load_model, _release_model
+11:14:58 | INFO     | __main__               | Teljes futasi ido: 1.2s
+11:19:28 | INFO     | providers.translation.ollama | [ollama] Modell elérhető: openbmb/minicpm-v2.6:8b
+11:19:28 | DEBUG    | providers.base         | Provider regisztrálva: ollama
+11:19:28 | DEBUG    | providers.base         | Provider regisztrálva: qwen2_vl
+11:19:28 | CRITICAL | __main__               | Varatlan hiba: BaseProvider.__init__() missing 1 required positional argument: 'provider_id'
+Traceback (most recent call last):
+  File "/home/teszt/Comic Translate/main.py", line 344, in main
+    exit_code = run_batch(args)
+                ^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/main.py", line 302, in run_batch
+    orch     = PipelineOrchestrator(pcfg)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/orchestrator.py", line 522, in __init__
+    self._init_providers()
+  File "/home/teszt/Comic Translate/orchestrator.py", line 550, in _init_providers
+    self.registry.register(MiniCPMOCRProvider())
+                           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/providers/vision/minicpm_ocr.py", line 21, in __init__
+    super().__init__()
+TypeError: BaseProvider.__init__() missing 1 required positional argument: 'provider_id'
+11:19:28 | INFO     | __main__               | Teljes futasi ido: 1.2s
+07:49:54 | INFO     | providers.translation.ollama | [ollama] Modell elérhető: openbmb/minicpm-v2.6:8b
+07:49:54 | DEBUG    | providers.base         | Provider regisztrálva: ollama
+07:49:54 | DEBUG    | providers.base         | Provider regisztrálva: qwen2_vl
+07:49:54 | CRITICAL | __main__               | Varatlan hiba: BaseProvider.__init__() missing 1 required positional argument: 'provider_id'
+Traceback (most recent call last):
+  File "/home/teszt/Comic Translate/main.py", line 344, in main
+    exit_code = run_batch(args)
+                ^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/main.py", line 302, in run_batch
+    orch     = PipelineOrchestrator(pcfg)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/orchestrator.py", line 522, in __init__
+    self._init_providers()
+  File "/home/teszt/Comic Translate/orchestrator.py", line 550, in _init_providers
+    self.registry.register(MiniCPMOCRProvider())
+                           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/teszt/Comic Translate/providers/vision/minicpm_ocr.py", line 21, in __init__
+    super().__init__()
+TypeError: BaseProvider.__init__() missing 1 required positional argument: 'provider_id'
+07:49:54 | INFO     | __main__               | Teljes futasi ido: 1.2s

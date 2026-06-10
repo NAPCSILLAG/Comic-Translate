@@ -408,13 +408,47 @@ handle_exit() {
 }
 
 # =============================================================================
-# Profilok
+# OCR Backend választás
+# =============================================================================
+select_ocr_backend() {
+    local backend=""
+    while true; do
+        echo ""
+        echo -e "${BOLD}OCR Backend:${NC}"
+        echo ""
+        echo -e "  ${CYAN}[1]${NC} PPOCRv5"
+        echo -e "  ${CYAN}[2]${NC} EasyOCR"
+        echo -e "  ${CYAN}[3]${NC} PaddleOCR"
+        echo -e "  ${CYAN}[4]${NC} MiniCPM OCR (Ollama)"
+        echo -e "  ${CYAN}[5]${NC} Gemini Flash Cloud"
+        echo -e "  ${CYAN}[6]${NC} Qwen2-VL Legacy"
+        echo ""
+        echo -ne "${BOLD}Választás [1-6]: ${NC}"
+        local choice
+        read -r choice
+        case "${choice}" in
+            1) backend="ppocr" ;;
+            2) backend="easyocr" ;;
+            3) backend="paddleocr" ;;
+            4) backend="minicpm_ocr" ;;
+            5) backend="gemini_flash" ;;
+            6) backend="qwen2_vl" ;;
+            *) echo -e "${RED}[ERROR] Érvénytelen választás: ${choice}${NC}"; continue ;;
+        esac
+        export COMIC_OCR_BACKEND="${backend}"
+        break
+    done
+    echo -e "${GREEN}[OK]${NC} OCR backend: ${CYAN}${backend}${NC}"
+}
+
+# =============================================================================
+# Profilok és futtatás
 # =============================================================================
 
 run_quality() {
     local interactive="${1:-0}"
     print_run_info "QUALITY" "teljes pipeline | max minőség"
-
+    echo -e "${DIM}OCR Backend:${NC} ${CYAN}${COMIC_OCR_BACKEND:-ppocr}${NC}"
     local code
     run_main \
         --input-dir "${INPUT_DIR}" \
@@ -428,7 +462,7 @@ run_quality() {
 run_quick() {
     local interactive="${1:-0}"
     print_run_info "QUICK" "--skip-vlm --skip-gemma"
-
+    echo -e "${DIM}OCR Backend:${NC} ${CYAN}${COMIC_OCR_BACKEND:-ppocr}${NC}"
     local code
     run_main \
         --input-dir "${INPUT_DIR}" \
@@ -444,7 +478,7 @@ run_quick() {
 run_debug() {
     local interactive="${1:-0}"
     print_run_info "DEBUG" "--debug --save-stages --verbose"
-
+    echo -e "${DIM}OCR Backend:${NC} ${CYAN}${COMIC_OCR_BACKEND:-ppocr}${NC}"
     local code
     run_main \
         --input-dir "${INPUT_DIR}" \
@@ -461,7 +495,7 @@ run_debug() {
 run_dry() {
     local interactive="${1:-0}"
     print_run_info "DRY-RUN" "--dry-run"
-
+    echo -e "${DIM}OCR Backend:${NC} ${CYAN}${COMIC_OCR_BACKEND:-ppocr}${NC}"
     local code
     run_main \
         --input-dir "${INPUT_DIR}" \
@@ -497,33 +531,95 @@ run_doctor() {
 }
 
 # =============================================================================
+# OCR Backend választás
+# =============================================================================
+select_ocr_backend() {
+    local backend=""
+    while true; do
+        echo ""
+        echo -e "${BOLD}OCR Backend:${NC}"
+        echo ""
+        echo -e "  ${CYAN}[1]${NC} PPOCRv5"
+        echo -e "  ${CYAN}[2]${NC} EasyOCR"
+        echo -e "  ${CYAN}[3]${NC} PaddleOCR"
+        echo -e "  ${CYAN}[4]${NC} MiniCPM OCR (Ollama)"
+        echo -e "  ${CYAN}[5]${NC} Gemini Flash Cloud"
+        echo -e "  ${CYAN}[6]${NC} Qwen2-VL Legacy"
+        echo ""
+        echo -ne "${BOLD}Választás [1-6]: ${NC}"
+        local choice
+        read -r choice
+        case "${choice}" in
+            1) backend="ppocr" ;;
+            2) backend="easyocr" ;;
+            3) backend="paddleocr" ;;
+            4) backend="minicpm_ocr" ;;
+            5) backend="gemini_flash" ;;
+            6) backend="qwen2_vl" ;;
+            *) echo -e "${RED}[ERROR] Érvénytelen választás: ${choice}${NC}"; continue ;;
+        esac
+        export COMIC_OCR_BACKEND="${backend}"
+        break
+    done
+    echo -e "${GREEN}[OK]${NC} OCR backend: ${CYAN}${backend}${NC}"
+}
+
+# =============================================================================
 # Interaktív menü – persistent loop
 # =============================================================================
 
 show_menu() {
+    # OCR labellek összeállítása
+    OCR_LABEL_PPOCR="PPOCRv5"
+    OCR_LABEL_MINICPM=$("${PYTHON}" -c "
+import sys
+sys.path.insert(0, '.')
+from config import cfg
+print(cfg.ocr.minicpm_model_name or 'nem konfigurált')
+" 2>/dev/null || echo "nem konfigurált")
+    OCR_LABEL_GEMINI=$("${PYTHON}" -c "
+import sys
+sys.path.insert(0, '.')
+from config import cfg
+print(cfg.ocr.gemini_model or 'nem konfigurált')
+" 2>/dev/null || echo "nem konfigurált")
+    OCR_LABEL_VLM=$("${PYTHON}" -c "
+import sys
+sys.path.insert(0, '.')
+from config import cfg
+print(cfg.vision.vlm_model_name or 'nem konfigurált')
+" 2>/dev/null || echo "nem konfigurált")
+
     # Persistent menu loop – csak EXIT vagy Ctrl+C löki ki
     while true; do
         echo ""
-        echo -e "${BOLD}Válassz futtatási módot:${NC}"
+        echo -e "${BOLD}OCR mód:${NC}"
         echo ""
-        echo -e "  ${CYAN}[1]${NC} QUALITY    teljes pipeline | max minőség"
-        echo -e "  ${CYAN}[2]${NC} QUICK      gyors | alacsony VRAM"
-        echo -e "  ${CYAN}[3]${NC} DEBUG      debug + stage mentés + verbose"
-        echo -e "  ${CYAN}[4]${NC} DRY-RUN    OCR + fordítás | render nélkül"
-        echo -e "  ${CYAN}[5]${NC} DOCTOR     diagnosztika"
-        echo -e "  ${CYAN}[6]${NC} EXIT"
+        echo -e "  ${CYAN}[1]${NC} Hagyományos OCR      (${OCR_LABEL_PPOCR})"
+        echo -e "  ${CYAN}[2]${NC} Lokális AI OCR       (${OCR_LABEL_MINICPM})"
+        echo -e "  ${CYAN}[3]${NC} Felhős AI            (${OCR_LABEL_GEMINI})"
+        echo -e "  ${CYAN}[4]${NC} Lokális VLM (Legacy) (${OCR_LABEL_VLM})"
         echo ""
-        echo -ne "${BOLD}Választás [1-6]: ${NC}"
+        echo -e "${BOLD}Egyéb:${NC}"
+        echo ""
+        echo -e "  ${CYAN}[5]${NC} DEBUG      debug + stage mentés + verbose"
+        echo -e "  ${CYAN}[6]${NC} DRY-RUN    OCR + fordítás | render nélkül"
+        echo -e "  ${CYAN}[7]${NC} DOCTOR     diagnosztika"
+        echo -e "  ${CYAN}[8]${NC} EXIT"
+        echo ""
+        echo -ne "${BOLD}Választás [1-8]: ${NC}"
 
         read -r choice
 
         case "${choice}" in
-            1) run_quality 1 ;;
-            2) run_quick   1 ;;
-            3) run_debug   1 ;;
-            4) run_dry     1 ;;
-            5) run_doctor  1 ;;
-            6)
+            1) COMIC_OCR_BACKEND="ppocr";         run_quality 1  ;;
+            2) COMIC_OCR_BACKEND="minicpm_ocr";   run_quality 1  ;;
+            3) COMIC_OCR_BACKEND="gemini_flash";  run_quality 1  ;;
+            4) COMIC_OCR_BACKEND="qwen2_vl";      run_quality 1  ;;
+            5) run_debug  1 ;;
+            6) run_dry    1 ;;
+            7) run_doctor 1 ;;
+            8)
                 echo ""
                 echo -e "${DIM}Kilépés.${NC}"
                 exit 0
